@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
           lfs: true
       - name: Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: DragonBoy/Library	
           key: Library-${{ matrix.targetPlatform }}
@@ -37,7 +37,7 @@ jobs:
           buildName: DragonBoy
           allowDirtyBuild: true
       - name: Upload build results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}

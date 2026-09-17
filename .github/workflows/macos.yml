@@ -1,44 +1,45 @@
-name: Build project for MacOS operating system
+name: Build macOS
+
 on: workflow_dispatch
+
 jobs:
   build-MacOS:
-    name: Build for ${{ matrix.targetPlatform }} with ${{matrix.scriptingBackend}} scripting backend on MacOS runner
+    name: Build StandaloneOSX (Mono)
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        targetPlatform:
-          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-        scriptingBackend:
-          - Mono # 0
-          - IL2CPP # 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
-      - name: Cache
-        uses: actions/cache@v3
+
+      - name: Cache Library
+        uses: actions/cache@v4
         with:
           path: DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-StandaloneOSX-Mono
           restore-keys: Library-
-      - name: Change scripting backend to ${{matrix.scriptingBackend}}
-        run: chmod +x set_scripting_backend_mac.sh && ./set_scripting_backend_mac.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{matrix.scriptingBackend}}"
-      - name: Build project
+
+      - name: Set scripting backend
+        run: |
+          chmod +x set_scripting_backend_mac.sh
+          ./set_scripting_backend_mac.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "StandaloneOSX" "Mono"
+
+      - name: Build
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: StandaloneOSX
           projectPath: DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true
-      - name: Upload build results
-        uses: actions/upload-artifact@v3
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
-          path: build/${{ matrix.targetPlatform }}
+          name: DragonBoy-macOS
+          path: build/StandaloneOSX
+          if-no-files-found: error
